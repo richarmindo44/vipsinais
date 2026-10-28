@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium AVI A-P-P</title>
+    <!-- Manifesto embutido para PWA -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+        %22name%22: %22Premium AVI APP%22,
+        %22short_name%22: %22Aviator%22,
+        %22start_url%22: %22.%22,
+        %22display%22: %22standalone%22,
+        %22background_color%22: %22%232b3990%22,
+        %22theme_color%22: %22%23253275%22,
+        %22icons%22: [{
+            %22src%22: %22https://cdn-icons-png.flaticon.com/512/1828/1828884.png%22,
+            %22sizes%22: %22512x512%22,
+            %22type%22: %22image/png%22
+        }]
+    }">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* Gradiente de fundo clonado 100% da imagem */
+            background: linear-gradient(180deg, #37468b 0%, #5263a8 30%, #a4b3d6 65%, #e6e9f2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Barra do Topo */
+        .app-header {
+            width: 100%;
+            background-color: #25316d;
+            color: #ffffff;
+            text-align: center;
+            padding: 16px 16px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 400px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px 20px 20px;
+        }
+
+        /* Container do Gráfico */
+        .graphic-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: auto;
+            margin-bottom: auto;
+            filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.1));
+        }
+
+        .svg-graphic {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Animações de Rotação */
+        .outer-dash {
+            transform-origin: center;
+            animation: rotateLinear 35s linear infinite;
+        }
+
+        .red-blocks {
+            transform-origin: center;
+            animation: rotateLinearRev 25s linear infinite;
+        }
+
+        .blue-pointer {
+            transform-origin: center;
+            animation: processRotate 2s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
+        }
+
+        @keyframes rotateLinear {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateLinearRev {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        @keyframes processRotate {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(200deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Spinner central fixo a girar no próprio eixo com traços encorpados */
+        .center-spinner {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: spinnerRotate 1s steps(12) infinite;
+        }
+
+        .spinner-blade {
+            position: absolute;
+            left: 20px;
+            top: 2px;
+            width: 6px;
+            height: 13px;
+            background-color: #ffffff;
+            border-radius: 3px;
+            transform-origin: 3px 21px;
+        }
+
+        /* Distribuição dos 12 traços em círculo perfeito */
+        .spinner-blade:nth-child(1)  { transform: rotate(0deg); opacity: 0.25; }
+        .spinner-blade:nth-child(2)  { transform: rotate(30deg); opacity: 0.3; }
+        .spinner-blade:nth-child(3)  { transform: rotate(60deg); opacity: 0.35; }
+        .spinner-blade:nth-child(4)  { transform: rotate(90deg); opacity: 0.4; }
+        .spinner-blade:nth-child(5)  { transform: rotate(120deg); opacity: 0.5; }
+        .spinner-blade:nth-child(6)  { transform: rotate(150deg); opacity: 0.6; }
+        .spinner-blade:nth-child(7)  { transform: rotate(180deg); opacity: 0.7; }
+        .spinner-blade:nth-child(8)  { transform: rotate(210deg); opacity: 0.8; }
+        .spinner-blade:nth-child(9)  { transform: rotate(240deg); opacity: 0.9; }
+        .spinner-blade:nth-child(10) { transform: rotate(270deg); opacity: 1.0; background-color: #2b3990; }
+        .spinner-blade:nth-child(11) { transform: rotate(300deg); opacity: 0.15; }
+        .spinner-blade:nth-child(12) { transform: rotate(330deg); opacity: 0.2; }
+
+        @keyframes spinnerRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Botão Profissional "Gerar Sinais" */
+        .btn-next {
+            width: 100%;
+            max-width: 320px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: #ffffff;
+            font-size: 1.15rem;
+            font-weight: 800;
+            cursor: pointer;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            margin-top: -110px; /* Puxado ainda mais para cima */
+        }
+
+        .btn-next:active {
+            transform: scale(0.96);
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+        }
+
+        /* Modal Inferior */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: flex-end;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            color: #0f172a;
+            border-radius: 32px 32px 0 0;
+            padding: 36px 24px 40px 24px;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            text-align: center;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #fee2e2;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            margin: 0 auto 16px auto;
+            font-weight: 900;
+        }
+
+        .modal-title {
+            color: #111827;
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            padding: 0 10px;
+        }
+
+        .btn-account {
+            width: 100%;
+            background-color: #25316d;
+            color: #ffffff;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(37, 49, 109, 0.35);
+            margin-bottom: 12px;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cabeçalho Superior -->
+    <div class="app-header">
+        Premium AVI A-P-P
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <div class="graphic-container">
+            <svg class="svg-graphic" viewBox="0 0 300 300">
+                <defs>
+                    <marker id="perfectArrow" 
+                            viewBox="0 0 10 10" 
+                            refX="6" 
+                            refY="5" 
+                            markerWidth="3.2" 
+                            markerHeight="3.2" 
+                            orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb" />
+                    </marker>
+                </defs>
+
+                <!-- 1º Círculo: Linha tracejada exterior -->
+                <circle class="outer-dash" cx="150" cy="150" r="135" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="10,8" opacity="0.95"/>
+                
+                <!-- 2º Círculo: Anel branco contínuo com grossura aumentada (8px) -->
+                <circle cx="150" cy="150" r="118" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.95"/>
+
+                <!-- 3º Círculo: Exatamente 8 blocos vermelhos -->
+                <circle class="red-blocks" cx="150" cy="150" r="96" fill="none" stroke="#ef4444" stroke-width="15" stroke-dasharray="42,33.3" stroke-linecap="butt"/>
+
+                <!-- 4º Círculo / Ponteiro Azul -->
+                <g class="blue-pointer">
+                    <path d="M 150 81 A 69 69 0 1 1 101 198" 
+                          fill="none" 
+                          stroke="#2563eb" 
+                          stroke-width="8" 
+                          stroke-linecap="round"
+                          marker-end="url(#perfectArrow)"/>
+                </g>
+            </svg>
+
+            <!-- Spinner central com traços mais encorpados a girar no próprio eixo -->
+            <div class="center-spinner">
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+                <div class="spinner-blade"></div>
+            </div>
+        </div>
+
+        <!-- Botão Profissional "Gerar Sinais" -->
+        <button class="btn-next" onclick="handleGenerateSignal()">
+            Gerar Sinais
+        </button>
+    </div>
+
+    <!-- Modal de Aviso Importante -->
+    <div class="modal-overlay" id="modalOverlay" onclick="handleOutsideClick(event)">
+        <div class="modal-card">
+            <div class="modal-icon">!</div>
+            <h2 class="modal-title">Aviso Importante</h2>
+            <p class="modal-text">Cria uma nova conta, faz um depósito mínimo de 150 MT e entra no aviator fazer apostas, os sinais vão aparecer automaticamente depois de fazer uma aposta no aviator...</p>
+            
+            <a href="https://go.aff.nicebetpartners.com/okl9pq7f" target="_blank" onclick="registerClick()" class="btn-account">
+                Gerar sinais automaticamente
+            </a>
+
+            <button class="btn-back" onclick="closeModal()">Voltar</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7a7EVFzwqFi2BLKl49bv4HLIFmxsyHIk",
+            authDomain: "affiliate-recruiter-71b84.firebaseapp.com",
+            projectId: "affiliate-recruiter-71b84",
+            storageBucket: "affiliate-recruiter-71b84.firebasestorage.app",
+            messagingSenderId: "473254947460",
+            appId: "1:473254947460:web:063e24304819901ac5b0d1",
+            measurementId: "G-Z3V6LNWLM9"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+        const VAPID_KEY = "BMwS_Tc2fUKSWuRWyknmzztXcil5wi9L_zAxr69-EQlJ4Vu1C0YR1Q97Wda3Be36uYpJj7KqLHsndmZWxkgZ9lY";
+
+        let swRegistration = null;
+
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('push', function(event) {
+                    const data = event.data ? event.data.json() : {};
+                    const title = data.title || 'Premium AVI A-P-P';
+                    const options = {
+                        body: data.body || 'Novo sinal disponível!',
+                        icon: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png',
+                        badge: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png',
+                        vibrate: [200, 100, 200]
+                    };
+                    event.waitUntil(self.registration.showNotification(title, options));
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'text/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(swUrl).then(reg => {
+                swRegistration = reg;
+            }).catch(err => console.log('Service Worker erro:', err));
+        }
+
+        function registerClick() {
+            closeModal();
+        }
+
+        // Pede obrigatoriamente a permissão de notificação nativa do browser
+        async function requestPushPermission() {
+            if ("Notification" in window) {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === "granted") {
+                        const token = await messaging.getToken({ vapidKey: VAPID_KEY });
+                        console.log("FCM Token obtido:", token);
+                    }
+                } catch (e) {
+                    console.error("Erro ao pedir permissão de notificação:", e);
+                }
+            }
+        }
+
+        // AO CLICAR EM GERAR SINAIS:
+        // Pede sempre a notificação e abre sempre a tela de Aviso Importante
+        async function handleGenerateSignal() {
+            await requestPushPermission();
+            openModal();
+        }
+
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function handleOutsideClick(event) {
+            if (event.target.id === 'modalOverlay') {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
